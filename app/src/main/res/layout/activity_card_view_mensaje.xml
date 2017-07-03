@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingLeft="5sp"
+    android:paddingRight="5sp">     <!--Espacios a izquiera y derecha de la pantalla-->
+    <android.support.v7.widget.CardView
+        android:id="@+id/cardViewMensaje"
+        card_view:cardBackgroundColor="@android:color/transparent"
+        card_view:cardElevation="0dp"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"        >
+        <LinearLayout
+            android:id="@+id/mensajeBG"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/chatin"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvMensajeTexto"
+                android:maxWidth="240dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="mensaje de prueba" />
+            <TextView
+                android:id="@+id/tvHora"
+                android:maxWidth="240dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="12:00"
+                android:textAppearance="?android:attr/textAppearanceSmall"/>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</RelativeLayout>

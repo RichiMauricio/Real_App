@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.mauricio.real.PrincipalActivity"
+    android:background="@color/colorDarkBlue">
+
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="129dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Real App"
+            android:textColor="@color/colorWhite"
+            android:textSize="26sp"
+            android:id="@+id/textTitulo"
+            android:textStyle="bold"/>
+        <EditText
+            android:id="@+id/etUsuario"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Usuario"
+            android:textColorHint="@color/colorWhite"
+            android:textColor="@color/colorWhite"
+            android:drawableLeft="@drawable/ic_action_user"/>
+
+        <EditText
+            android:id="@+id/etContrasena"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Contraseña"
+            android:textColorHint="@color/colorWhite"
+            android:textColor="@color/colorWhite"
+            android:drawableLeft="@drawable/ic_action_lock_closed"
+            android:inputType="textPassword"/>
+
+        <Button
+            android:id="@+id/btnIngresar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:hint="Ingresar"
+            android:theme="@style/BotonColores"/>
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

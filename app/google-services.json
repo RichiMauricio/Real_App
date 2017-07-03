@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "312026655971",
+    "firebase_url": "https://real-app-dd216.firebaseio.com",
+    "project_id": "real-app-dd216",
+    "storage_bucket": "real-app-dd216.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:312026655971:android:c2336908d198fcdb",
+        "android_client_info": {
+          "package_name": "com.example.mauricio.real"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "312026655971-oppdb0rgp4d2k1127lrijeudqe7h63f7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQq1Itb9gDxM2d1nxNvRCybuwOaBpLlZ0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

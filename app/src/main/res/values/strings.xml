@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Real</string>
+    <string name="escibe">Escribir mensaje...</string>
+    <string name="enviar">Enviar</string>
+</resources>
