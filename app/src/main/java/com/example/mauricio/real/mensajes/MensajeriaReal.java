@@ -1,5 +1,10 @@
 package com.example.mauricio.real.mensajes;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,12 +19,16 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.mauricio.real.R;
+import com.example.mauricio.real.services.FirebaseId;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MensajeriaReal extends AppCompatActivity {
 
+    public static final String MENSAJE = "MENSAJE";
+    private BroadcastReceiver br;
     private RecyclerView rv;
     private List<MensajesDeTexto> mensajeTexto;
     private MensajesAdapter adapter;
@@ -70,7 +79,14 @@ public class MensajeriaReal extends AppCompatActivity {
         btnEnviarMensaje.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                crearMensaje(etEscribirMensaje.getText().toString());   //Se llama al método escribir mensaje tomando como parámetro el dontenido del editText
+                String mensaje = etEscribirMensaje.getText().toString();
+                String TOKEN = FirebaseInstanceId.getInstance().getToken();
+                if  (!mensaje.isEmpty()){
+                    crearMensaje(mensaje);   //Se llama al método escribir mensaje tomando como parámetro el dontenido del editText
+                }
+                if  (TOKEN!=null){
+                    Toast.makeText(MensajeriaReal.this,TOKEN, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -81,6 +97,14 @@ public class MensajeriaReal extends AppCompatActivity {
             }
         });
         setScrollBarChat();     //enviar el scroll al final para ver el último mensaje
+        //Broadcast reciber me permite actualizar los datos en segundo plano
+
+        br = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Toast.makeText(MensajeriaReal.this,"El broadcast funciona", Toast.LENGTH_SHORT).show();
+            }
+        };
     }
 
     public void crearMensaje(String mensaje){
@@ -95,7 +119,22 @@ public class MensajeriaReal extends AppCompatActivity {
         setScrollBarChat();     //Llamamos al método para q cada vez q haya un mensaje vaya al final de la pantalla
     }
 
+    @Override
+    protected void onPause(){
+        super.onPause();
+        //Permite parar el broadcastreciver por el moemnto y q no se actualicen los mensajes
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(br);
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        //Vovler a nicializar el br si esq se lo detuvo en el método onPause
+        LocalBroadcastManager.getInstance(this).registerReceiver(br, new IntentFilter(MENSAJE));
+    }
     public void setScrollBarChat(){
         rv.scrollToPosition(adapter.getItemCount()-1);  //Ubicar la pantalla al final para leer el último mensaje
     }
+
+
 }
