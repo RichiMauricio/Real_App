@@ -51,25 +51,6 @@ public class MensajeriaReal extends AppCompatActivity {
 
         btnEnviarMensaje = (ImageButton)findViewById(R.id.btnEnviarMensaje);
         etEscribirMensaje = (EditText)findViewById(R.id.etEscribirMensaje);
-
-        for (int i=0;i<10;i++){
-            MensajesDeTexto mensajeDeTextoAuxiliar = new MensajesDeTexto();
-            mensajeDeTextoAuxiliar.setId("" + i);
-            mensajeDeTextoAuxiliar.setMensaje("Emisor " + i);
-            mensajeDeTextoAuxiliar.setHoraMensaje("20:4" + i);
-            mensajeDeTextoAuxiliar.setTipoMensaje(1);
-            mensajeTexto.add(mensajeDeTextoAuxiliar);
-        }
-
-        for (int i=0;i<10;i++){
-            MensajesDeTexto mensajeDeTextoAuxiliar = new MensajesDeTexto();
-            mensajeDeTextoAuxiliar.setId("" + i);
-            mensajeDeTextoAuxiliar.setMensaje("Receptor " + i);
-            mensajeDeTextoAuxiliar.setHoraMensaje("20:4" + i);
-            mensajeDeTextoAuxiliar.setTipoMensaje(2);
-            mensajeTexto.add(mensajeDeTextoAuxiliar);
-        }
-
         adapter = new MensajesAdapter(mensajeTexto,this);
 
         rv.setAdapter(adapter);
@@ -80,12 +61,9 @@ public class MensajeriaReal extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String mensaje = etEscribirMensaje.getText().toString();
-                String TOKEN = FirebaseInstanceId.getInstance().getToken();
                 if  (!mensaje.isEmpty()){
-                    crearMensaje(mensaje);   //Se llama al método escribir mensaje tomando como parámetro el dontenido del editText
-                }
-                if  (TOKEN!=null){
-                    Toast.makeText(MensajeriaReal.this,TOKEN, Toast.LENGTH_SHORT).show();
+                    crearMensaje(mensaje,"00:00",1);   //Se llama al método escribir mensaje tomando como parámetro el dontenido del editText
+                    etEscribirMensaje.setText("");
                 }
             }
         });
@@ -96,26 +74,27 @@ public class MensajeriaReal extends AppCompatActivity {
                 finish();
             }
         });
-        setScrollBarChat();     //enviar el scroll al final para ver el último mensaje
         //Broadcast reciber me permite actualizar los datos en segundo plano
+        setScrollBarChat();     //enviar el scroll al final para ver el último mensaje
 
         br = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Toast.makeText(MensajeriaReal.this,"El broadcast funciona", Toast.LENGTH_SHORT).show();
+                String mensaje = intent.getStringExtra("key_mensaje");
+                String hora = intent.getStringExtra("key_hora");
+                crearMensaje(mensaje,hora,2);
             }
         };
     }
 
-    public void crearMensaje(String mensaje){
+    public void crearMensaje(String mensaje,String hora, int tipoMensaje){
         MensajesDeTexto mensajeDeTextoAuxiliar = new MensajesDeTexto();
         mensajeDeTextoAuxiliar.setId("0");
         mensajeDeTextoAuxiliar.setMensaje(mensaje);
-        mensajeDeTextoAuxiliar.setHoraMensaje("21:30");
-        mensajeDeTextoAuxiliar.setTipoMensaje(1);
+        mensajeDeTextoAuxiliar.setHoraMensaje(hora);
+        mensajeDeTextoAuxiliar.setTipoMensaje(tipoMensaje);
         mensajeTexto.add(mensajeDeTextoAuxiliar);
         adapter.notifyDataSetChanged();     //Método que indica que ha ocurrido algún cambio en el adapter
-        etEscribirMensaje.setText("");
         setScrollBarChat();     //Llamamos al método para q cada vez q haya un mensaje vaya al final de la pantalla
     }
 
@@ -135,6 +114,4 @@ public class MensajeriaReal extends AppCompatActivity {
     public void setScrollBarChat(){
         rv.scrollToPosition(adapter.getItemCount()-1);  //Ubicar la pantalla al final para leer el último mensaje
     }
-
-
 }

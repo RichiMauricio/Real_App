@@ -8,19 +8,28 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.mauricio.real.mensajes.MensajeriaReal;
+import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.prefs.Preferences;
+
+//Por el momento esta Actividad es el Login
 public class PrincipalActivity extends AppCompatActivity {
 
     private EditText etUsuario;
     private EditText etContrasena;
     private Button btnIngresar;
-    private static String IP= "http://realappdemo.pe.hu/ArchivosPHP/Login_GETID.php?id=";
+    private static final String IP= "http://realappdemo.pe.hu/ArchivosPHP/Login_GETID.php?id=";
+    private static final String IP_TOKEN = "http://realappdemo.pe.hu/ArchivosPHP/Token_INSERT_and_UPDATE.php";
 
     private RequestQueue mRequest;
     private VolleyRP volley;
@@ -80,9 +89,19 @@ public class PrincipalActivity extends AppCompatActivity {
                 String usr_nombre = JsonDatos.getString("Usr_Nombre");
                 String usr_contrasena = JsonDatos.getString("Usr_Contrasena");
                 if (usr_nombre.equals(USER) && usr_contrasena.equals(PASS)){
-                    Toast.makeText(PrincipalActivity.this, "Ingreso correcto", Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(this,MenuPrincipal.class);
-                    startActivity(i);
+                    String  token= FirebaseInstanceId.getInstance().getToken();
+                    //Posible corrección...!!!
+                    if (token != null){
+                        //if((""+token.charAt(0)).equalsIgnoreCase("{")) {
+                        //JSONObject js = new JSONObject(token);//SOLO SI APARECE {"token":"...."} o "asdasdas"
+                        //String tokenRecortado = js.getString("token");
+                        subirToken(token);
+                        /*}else{
+                            subirToken(token);
+                        }*/
+                    }else{
+                        Toast.makeText(PrincipalActivity.this, "El token es nulo...!!!", Toast.LENGTH_SHORT).show();
+                    }
                 }else {
                     Toast.makeText(PrincipalActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
                 }
@@ -92,5 +111,33 @@ public class PrincipalActivity extends AppCompatActivity {
         }catch(Exception e){
             Toast.makeText(PrincipalActivity.this, "Error ocurrido: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void subirToken(String token){
+        HashMap<String,String> hashMapToken = new HashMap<>();
+        hashMapToken.put("tkn_user",USER);
+        hashMapToken.put("tkn_token",token);
+        JSONObject params = new JSONObject(hashMapToken);
+
+        //Con esto decimos q nuestra solicitud va a ser un método post
+        JsonObjectRequest solicitud = new JsonObjectRequest(Request.Method.POST,IP_TOKEN, params, new Response.Listener<JSONObject>(){
+            @Override
+            public void onResponse(JSONObject datos) {
+                try {
+                    Toast.makeText(PrincipalActivity.this,datos.getString("Token subido correctamente"),Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
+                    startActivity(i);
+                } catch (JSONException e){
+                    Toast.makeText(PrincipalActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
+                }
+            }
+        },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Toast.makeText(PrincipalActivity.this,"El token no se pudo subir a la base de datos " + error.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+        VolleyRP.addToQueue(solicitud,mRequest,this,volley);
     }
 }
