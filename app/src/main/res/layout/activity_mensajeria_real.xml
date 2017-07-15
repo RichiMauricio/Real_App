@@ -44,6 +44,10 @@
                 android:layout_height="wrap_content"
                 app:navigationIcon="?attr/homeAsUpIndicator">
             </android.support.v7.widget.Toolbar>
+            <EditText
+                android:id="@+id/etreceptor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
         </android.support.design.widget.AppBarLayout>
 
         <android.support.v7.widget.RecyclerView

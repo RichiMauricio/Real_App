@@ -27,8 +27,10 @@ public class FirebaseServiceMensajes extends FirebaseMessagingService {
         super.onMessageReceived(remoteMessage);
         String mensaje = remoteMessage.getData().get("mensaje");
         String hora = remoteMessage.getData().get("hora");
+        String cabecera = remoteMessage.getData().get("cabecera");
+        String cuerpo_mensaje = remoteMessage.getData().get("cuerpo_mensaje");
         mensaje(mensaje,hora );
-        showNotification();
+        showNotification(cabecera,cuerpo_mensaje);
     }
 
     private void mensaje(String mensaje, String hora){
@@ -39,7 +41,7 @@ public class FirebaseServiceMensajes extends FirebaseMessagingService {
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(i);
     }
 
-    private void showNotification(){
+    private void showNotification(String cabecera, String cuerpo){
         Intent i = new Intent(this,MensajeriaReal.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this,0,i,PendingIntent.FLAG_ONE_SHOT);  //El último parámetro es para cerrar la notificación al dar clic y no q siga visible
         //Uri del sonido de la notif
@@ -49,9 +51,9 @@ public class FirebaseServiceMensajes extends FirebaseMessagingService {
         //Acción que queremos q haga la notif al momento de darle clic osea cancelarla
         builder.setAutoCancel(true);
         //titulo de la notif
-        builder.setContentTitle("Real App desde android");
+        builder.setContentTitle(cabecera);
         //Cuerpo de la notif
-        builder.setContentText("Este es el cuerpo de Real");
+        builder.setContentText(cuerpo);
         //Sonido de la notificación
         builder.setSound(soundNotif);
         //Ícono de la notif

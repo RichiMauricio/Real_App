@@ -18,11 +18,22 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.mauricio.real.PrincipalActivity;
 import com.example.mauricio.real.R;
+import com.example.mauricio.real.VolleyRP;
 import com.example.mauricio.real.services.FirebaseId;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MensajeriaReal extends AppCompatActivity {
@@ -34,13 +45,29 @@ public class MensajeriaReal extends AppCompatActivity {
     private MensajesAdapter adapter;
     private ImageButton btnEnviarMensaje;
     private EditText etEscribirMensaje;
+    private EditText etReceptor;
     private int LINEAS_TEXTO=1;
+
+    private RequestQueue mRequest;
+    private VolleyRP volley;
+
+    private String MENSAJE_ENVIAR = "";
+    private String EMISOR = "";
+    private String RECEPTOR = "";
+
+    private static final String IP_MENSAJE = "http://realappdemo.pe.hu/ArchivosPHP/EnviarMensajes.php";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mensajeria_real);
         mensajeTexto = new ArrayList<>();
+
+        Intent extras = getIntent();
+        Bundle bundle = extras.getExtras();
+        if (bundle!=null){
+            EMISOR = bundle.getString("key_emisor");
+        }
 
         Toolbar toolBar= (Toolbar)findViewById(R.id.barraTareas);
 
@@ -51,6 +78,7 @@ public class MensajeriaReal extends AppCompatActivity {
 
         btnEnviarMensaje = (ImageButton)findViewById(R.id.btnEnviarMensaje);
         etEscribirMensaje = (EditText)findViewById(R.id.etEscribirMensaje);
+        etReceptor = (EditText)findViewById(R.id.etreceptor);
         adapter = new MensajesAdapter(mensajeTexto,this);
 
         rv.setAdapter(adapter);
@@ -61,7 +89,10 @@ public class MensajeriaReal extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String mensaje = etEscribirMensaje.getText().toString();
-                if  (!mensaje.isEmpty()){
+                RECEPTOR = etReceptor.getText().toString();
+                if  (!mensaje.isEmpty() && !RECEPTOR.isEmpty()){
+                    MENSAJE_ENVIAR = mensaje;
+                    enviarMensaje();
                     crearMensaje(mensaje,"00:00",1);   //Se llama al método escribir mensaje tomando como parámetro el dontenido del editText
                     etEscribirMensaje.setText("");
                 }
@@ -85,6 +116,31 @@ public class MensajeriaReal extends AppCompatActivity {
                 crearMensaje(mensaje,hora,2);
             }
         };
+    }
+
+    private void enviarMensaje(){
+        HashMap<String,String> hashMapToken = new HashMap<>();
+        hashMapToken.put("emisor",EMISOR);
+        hashMapToken.put("receptor",RECEPTOR);
+        hashMapToken.put("mensaje",MENSAJE_ENVIAR);
+        JSONObject params = new JSONObject(hashMapToken);
+
+        //Con esto decimos q nuestra solicitud va a ser un método post
+        JsonObjectRequest solicitud = new JsonObjectRequest(Request.Method.POST,IP_MENSAJE, params, new Response.Listener<JSONObject>(){
+            @Override
+            public void onResponse(JSONObject datos) {
+                try {
+                    Toast.makeText(MensajeriaReal.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
+                } catch (JSONException e){}
+            }
+        },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                error.printStackTrace();
+                Toast.makeText(MensajeriaReal.this,"Ocurrió un error " + error.getMessage() ,Toast.LENGTH_SHORT).show();
+            }
+        });
+        VolleyRP.addToQueue(solicitud,mRequest,this,volley);
     }
 
     public void crearMensaje(String mensaje,String hora, int tipoMensaje){

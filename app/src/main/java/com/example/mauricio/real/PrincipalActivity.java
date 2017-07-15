@@ -124,18 +124,17 @@ public class PrincipalActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONObject datos) {
                 try {
-                    Toast.makeText(PrincipalActivity.this,datos.getString("Token subido correctamente"),Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
-                    startActivity(i);
-                } catch (JSONException e){
-                    Toast.makeText(PrincipalActivity.this,e.getMessage(),Toast.LENGTH_SHORT).show();
-                }
+                    Toast.makeText(PrincipalActivity.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
+                } catch (JSONException e){}
+                Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
+                i.putExtra("key_emisor", USER);
+                startActivity(i);
             }
         },new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
-                Toast.makeText(PrincipalActivity.this,"El token no se pudo subir a la base de datos " + error.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(PrincipalActivity.this,"El token no se pudo subir a la base de datos " + error.getMessage() ,Toast.LENGTH_SHORT).show();
             }
         });
         VolleyRP.addToQueue(solicitud,mRequest,this,volley);
