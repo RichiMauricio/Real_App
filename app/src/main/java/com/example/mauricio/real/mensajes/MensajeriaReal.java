@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.mauricio.real.Preferencias;
 import com.example.mauricio.real.PrincipalActivity;
 import com.example.mauricio.real.R;
 import com.example.mauricio.real.VolleyRP;
@@ -36,6 +38,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.example.mauricio.real.R.id.rbSesion;
+
 public class MensajeriaReal extends AppCompatActivity {
 
     public static final String MENSAJE = "MENSAJE";
@@ -48,6 +52,8 @@ public class MensajeriaReal extends AppCompatActivity {
     private EditText etReceptor;
     private int LINEAS_TEXTO=1;
 
+    private Button cerrarSesion;
+
     private RequestQueue mRequest;
     private VolleyRP volley;
 
@@ -57,17 +63,19 @@ public class MensajeriaReal extends AppCompatActivity {
 
     private static final String IP_MENSAJE = "http://realappdemo.pe.hu/ArchivosPHP/EnviarMensajes.php";
 
+    public static final String STRING_PREFERENCES = "com.example.mauricio.real";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mensajeria_real);
         mensajeTexto = new ArrayList<>();
 
-        Intent extras = getIntent();
-        Bundle bundle = extras.getExtras();
-        if (bundle!=null){
-            EMISOR = bundle.getString("key_emisor");
-        }
+        EMISOR = Preferencias.obtenerPreferenceString(this,Preferencias.PREFERENCE_USUARIO_LOGIN);
+
+
+        volley = VolleyRP.getInstance(this);
+        mRequest = volley.getRequestQueue();
 
         Toolbar toolBar= (Toolbar)findViewById(R.id.barraTareas);
 
@@ -79,16 +87,27 @@ public class MensajeriaReal extends AppCompatActivity {
         btnEnviarMensaje = (ImageButton)findViewById(R.id.btnEnviarMensaje);
         etEscribirMensaje = (EditText)findViewById(R.id.etEscribirMensaje);
         etReceptor = (EditText)findViewById(R.id.etreceptor);
+        cerrarSesion = (Button)findViewById(R.id.btnCerrarSesion);
         adapter = new MensajesAdapter(mensajeTexto,this);
 
         rv.setAdapter(adapter);
+
+        cerrarSesion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MensajeriaReal.this,PrincipalActivity.class);
+                startActivity(i);
+                Preferencias.guardarPreferenciasBoolean(MensajeriaReal.this,false,Preferencias.PREFERENCE_ESTADO_SESION);
+                finish();
+            }
+        });
 
         //Cada q haya un salto de línea no tapar el recycler view, sino q vaya desplegando al final el scroll
 
         btnEnviarMensaje.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mensaje = etEscribirMensaje.getText().toString();
+                String mensaje = validarCadena(etEscribirMensaje.getText().toString());
                 RECEPTOR = etReceptor.getText().toString();
                 if  (!mensaje.isEmpty() && !RECEPTOR.isEmpty()){
                     MENSAJE_ENVIAR = mensaje;
@@ -118,6 +137,7 @@ public class MensajeriaReal extends AppCompatActivity {
         };
     }
 
+
     private void enviarMensaje(){
         HashMap<String,String> hashMapToken = new HashMap<>();
         hashMapToken.put("emisor",EMISOR);
@@ -131,7 +151,9 @@ public class MensajeriaReal extends AppCompatActivity {
             public void onResponse(JSONObject datos) {
                 try {
                     Toast.makeText(MensajeriaReal.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
-                } catch (JSONException e){}
+                } catch (JSONException e){
+                    Toast.makeText(MensajeriaReal.this,"Ocurrió un error " + e.getMessage() ,Toast.LENGTH_SHORT).show();
+                }
             }
         },new Response.ErrorListener(){
             @Override
@@ -169,5 +191,15 @@ public class MensajeriaReal extends AppCompatActivity {
     }
     public void setScrollBarChat(){
         rv.scrollToPosition(adapter.getItemCount()-1);  //Ubicar la pantalla al final para leer el último mensaje
+    }
+
+    //Método para no enviar espacios en blanco o eliminar los espacios en blanco al inicio del mensaje
+    private String validarCadena(String cadena){
+        for(int i =0;i<cadena.length();i++){
+            if (!(""+cadena.charAt(i)).equalsIgnoreCase(" ")){
+                return cadena.substring(i,cadena.length());
+            }
+        }
+        return "";
     }
 }

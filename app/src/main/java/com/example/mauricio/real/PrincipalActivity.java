@@ -1,11 +1,14 @@
 package com.example.mauricio.real;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -20,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.prefs.Preferences;
 
 //Por el momento esta Actividad es el Login
 public class PrincipalActivity extends AppCompatActivity {
@@ -28,11 +30,15 @@ public class PrincipalActivity extends AppCompatActivity {
     private EditText etUsuario;
     private EditText etContrasena;
     private Button btnIngresar;
+    private Button btnRegistrar;
+    private RadioButton rbSesion;
     private static final String IP= "http://realappdemo.pe.hu/ArchivosPHP/Login_GETID.php?id=";
     private static final String IP_TOKEN = "http://realappdemo.pe.hu/ArchivosPHP/Token_INSERT_and_UPDATE.php";
 
     private RequestQueue mRequest;
     private VolleyRP volley;
+
+    private Boolean isActivateRb;
 
     private String USER="";
     private String PASS="";
@@ -40,19 +46,48 @@ public class PrincipalActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_principal);
+        setContentView(R.layout.activity_login);
+
+        if (Preferencias.obtenerPreferenceBoolbean(this,Preferencias.PREFERENCE_ESTADO_SESION)){
+            Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
+            startActivity(i);
+            finish();
+        }
 
         etUsuario  = (EditText)findViewById(R.id.etUsuario);
         etContrasena = (EditText)findViewById(R.id.etContrasena);
+
         btnIngresar  = (Button)findViewById(R.id.btnIngresar);
+        btnRegistrar = (Button)findViewById(R.id.btnRegistrar);
+        rbSesion = (RadioButton)findViewById(R.id.rbSesion);
 
         volley = VolleyRP.getInstance(this);
         mRequest = volley.getRequestQueue();
+
+        isActivateRb=rbSesion.isChecked();//Desactivado
+
+        rbSesion.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isActivateRb){
+                    rbSesion.setChecked(false);
+                }
+                isActivateRb = rbSesion.isChecked();
+            }
+        });
 
         btnIngresar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 VerificarLogin(etUsuario.getText().toString().toLowerCase(),etContrasena.getText().toString().toLowerCase());
+            }
+        });
+
+        btnRegistrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(PrincipalActivity.this,activity_registro.class);
+                startActivity(i);
             }
         });
     }
@@ -62,6 +97,7 @@ public class PrincipalActivity extends AppCompatActivity {
         PASS = contrasena;
         SolicitudJSON(IP+user);
     }
+
 
     public void SolicitudJSON(String URL){
         JsonObjectRequest solicitud = new JsonObjectRequest(URL, null, new Response.Listener<JSONObject>() {
@@ -92,13 +128,13 @@ public class PrincipalActivity extends AppCompatActivity {
                     String  token= FirebaseInstanceId.getInstance().getToken();
                     //Posible corrección...!!!
                     if (token != null){
-                        //if((""+token.charAt(0)).equalsIgnoreCase("{")) {
-                        //JSONObject js = new JSONObject(token);//SOLO SI APARECE {"token":"...."} o "asdasdas"
-                        //String tokenRecortado = js.getString("token");
-                        subirToken(token);
-                        /*}else{
+                        if((""+token.charAt(0)).equalsIgnoreCase("{")) {
+                            JSONObject js = new JSONObject(token);//SOLO SI APARECE {"token":"...."} o "asdasdas"
+                            String tokenRecortado = js.getString("token");
+                            subirToken(tokenRecortado);
+                        }else{
                             subirToken(token);
-                        }*/
+                        }
                     }else{
                         Toast.makeText(PrincipalActivity.this, "El token es nulo...!!!", Toast.LENGTH_SHORT).show();
                     }
@@ -123,12 +159,14 @@ public class PrincipalActivity extends AppCompatActivity {
         JsonObjectRequest solicitud = new JsonObjectRequest(Request.Method.POST,IP_TOKEN, params, new Response.Listener<JSONObject>(){
             @Override
             public void onResponse(JSONObject datos) {
+                Preferencias.guardarPreferenciasBoolean(PrincipalActivity.this, rbSesion.isChecked(), Preferencias.PREFERENCE_ESTADO_SESION);
+                Preferencias.guardarPreferenciasString(PrincipalActivity.this, USER, Preferencias.PREFERENCE_USUARIO_LOGIN);
                 try {
                     Toast.makeText(PrincipalActivity.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
                 } catch (JSONException e){}
                 Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
-                i.putExtra("key_emisor", USER);
                 startActivity(i);
+                finish();
             }
         },new Response.ErrorListener(){
             @Override

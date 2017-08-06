@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
         android:allowBackup="true"
@@ -15,31 +16,42 @@
         <activity android:name=".PrincipalActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".mensajes.MensajeriaReal"
+        <activity
+            android:name=".mensajes.MensajeriaReal"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name=".CardViewMensaje"></activity>
-        <service android:name=".services.FirebaseId"
-            android:theme="@style/AppTheme.NoActionBar"
+        <activity android:name=".CardViewMensaje" />
+
+        <service
+            android:name=".services.FirebaseId"
             android:enabled="true"
-            android:exported="true">    <!--Los ID son los tokens q va a tener cada identificador para enviar notoficaciones y mensajes-->
+            android:exported="true"
+            android:theme="@style/AppTheme.NoActionBar"> <!-- Los ID son los tokens q va a tener cada identificador para enviar notoficaciones y mensajes -->
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".services.FirebaseServiceMensajes"
+        <service
+            android:name=".services.FirebaseServiceMensajes"
             android:enabled="true"
-            android:exported="true">        <!--Con esto pregunta si hay notificaciones a cada segundo y no a cada minuto y con android:enable indica q el servicio se iniciará cada vez q se reinicé el teléfono y no solo al iniciar la aplicación-->
+            android:exported="true"> <!-- Con esto pregunta si hay notificaciones a cada segundo y no a cada minuto y con android:enable indica q el servicio se iniciará cada vez q se reinicé el teléfono y no solo al iniciar la aplicación -->
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+
+        <activity android:name=".activity_registro" />
+        <activity android:name=".ListaAmigos" />
+        <activity android:name=".CardViewAmigos"></activity>
     </application>
+
 </manifest>

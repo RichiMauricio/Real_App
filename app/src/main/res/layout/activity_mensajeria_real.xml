@@ -43,6 +43,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:navigationIcon="?attr/homeAsUpIndicator">
+                <Button
+                    android:id="@+id/btnCerrarSesion"
+                    android:layout_width="wrap_content"
+                    android:text="Cerrar Sesión"
+                    android:layout_height="wrap_content" />
             </android.support.v7.widget.Toolbar>
             <EditText
                 android:id="@+id/etreceptor"
@@ -59,7 +64,6 @@
             android:layout_above="@+id/etEscribirMensaje"
             tools:listitem="@layout/activity_card_view_mensaje"
             android:id="@+id/rvMensajes">
-
         </android.support.v7.widget.RecyclerView>
     </RelativeLayout>
 </LinearLayout>
