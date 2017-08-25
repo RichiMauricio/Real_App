@@ -50,9 +50,7 @@ public class MensajesAdapter extends RecyclerView.Adapter<MensajesAdapter.Mensaj
 
     @Override
     public MensajesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {      //Con este método se infla tarjeta del layout card_view para q  al momenot d uplicar aparezca en nuestra vista
-
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_card_view_mensaje,parent, false);
-
         return new MensajesViewHolder(v);
     }
 
@@ -93,10 +91,7 @@ public class MensajesAdapter extends RecyclerView.Adapter<MensajesAdapter.Mensaj
         }else{
             holder.cardview.setBackgroundColor(ContextCompat.getColor(context,android.R.color.transparent));
         }
-
-
     }
-
 
     @Override
     public int getItemCount() {     //Los elementos que va a contener mi recyclerView.(Sitengo 10 mensajes este me retornaría 10 )

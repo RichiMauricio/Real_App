@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:paddingLeft="5sp"
-    android:paddingRight="5sp">     <!--Espacios a izquiera y derecha de la pantalla-->
+    android:paddingRight="5sp">     <!--Espacios a izquiera y derecha de la pantalla -->
     <android.support.v7.widget.CardView
         android:id="@+id/cardViewMensaje"
         card_view:cardBackgroundColor="@android:color/transparent"

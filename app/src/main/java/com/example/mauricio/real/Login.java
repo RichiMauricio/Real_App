@@ -1,8 +1,6 @@
 package com.example.mauricio.real;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -16,7 +14,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.example.mauricio.real.mensajes.MensajeriaReal;
+import com.example.mauricio.real.actividadDeUsuarios.Activity_principal;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
@@ -25,7 +24,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 
 //Por el momento esta Actividad es el Login
-public class PrincipalActivity extends AppCompatActivity {
+public class Login extends AppCompatActivity {
 
     private EditText etUsuario;
     private EditText etContrasena;
@@ -49,9 +48,7 @@ public class PrincipalActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         if (Preferencias.obtenerPreferenceBoolbean(this,Preferencias.PREFERENCE_ESTADO_SESION)){
-            Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
-            startActivity(i);
-            finish();
+            inicioOtraActividad();
         }
 
         etUsuario  = (EditText)findViewById(R.id.etUsuario);
@@ -79,14 +76,14 @@ public class PrincipalActivity extends AppCompatActivity {
         btnIngresar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                VerificarLogin(etUsuario.getText().toString().toLowerCase(),etContrasena.getText().toString().toLowerCase());
+                VerificarLogin(etUsuario.getText().toString(),etContrasena.getText().toString());
             }
         });
 
         btnRegistrar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(PrincipalActivity.this,activity_registro.class);
+                Intent i = new Intent(Login.this,Activity_registro.class);
                 startActivity(i);
             }
         });
@@ -110,7 +107,7 @@ public class PrincipalActivity extends AppCompatActivity {
             //Ejecuta esto cuando hay algún error e.j: cae el servidor
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(PrincipalActivity.this, "Error ocurrido " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(Login.this, "Error ocurrido " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
         VolleyRP.addToQueue(solicitud,mRequest,this,volley);
@@ -121,7 +118,6 @@ public class PrincipalActivity extends AppCompatActivity {
             String estado= datos.getString("resultado");
             if(estado.equals("consulta correcta")){
                 JSONObject JsonDatos = new JSONObject(datos.getString("datos"));
-                String usr_Id = JsonDatos.getString("Usr_Id");
                 String usr_nombre = JsonDatos.getString("Usr_Nombre");
                 String usr_contrasena = JsonDatos.getString("Usr_Contrasena");
                 if (usr_nombre.equals(USER) && usr_contrasena.equals(PASS)){
@@ -136,16 +132,16 @@ public class PrincipalActivity extends AppCompatActivity {
                             subirToken(token);
                         }
                     }else{
-                        Toast.makeText(PrincipalActivity.this, "El token es nulo...!!!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Login.this, "El token es nulo...!!!", Toast.LENGTH_SHORT).show();
                     }
                 }else {
-                    Toast.makeText(PrincipalActivity.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show();
                 }
             }else{
-                Toast.makeText(PrincipalActivity.this, estado, Toast.LENGTH_SHORT).show();
+                Toast.makeText(Login.this, estado, Toast.LENGTH_SHORT).show();
             }
         }catch(Exception e){
-            Toast.makeText(PrincipalActivity.this, "Error ocurrido: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(Login.this, "Error ocurrido en Login método VerificarPassword: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -159,22 +155,26 @@ public class PrincipalActivity extends AppCompatActivity {
         JsonObjectRequest solicitud = new JsonObjectRequest(Request.Method.POST,IP_TOKEN, params, new Response.Listener<JSONObject>(){
             @Override
             public void onResponse(JSONObject datos) {
-                Preferencias.guardarPreferenciasBoolean(PrincipalActivity.this, rbSesion.isChecked(), Preferencias.PREFERENCE_ESTADO_SESION);
-                Preferencias.guardarPreferenciasString(PrincipalActivity.this, USER, Preferencias.PREFERENCE_USUARIO_LOGIN);
+                Preferencias.guardarPreferenciasBoolean(Login.this, rbSesion.isChecked(), Preferencias.PREFERENCE_ESTADO_SESION);
+                Preferencias.guardarPreferenciasString(Login.this, USER, Preferencias.PREFERENCE_USUARIO_LOGIN);
                 try {
-                    Toast.makeText(PrincipalActivity.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Login.this,datos.getString("resultado"),Toast.LENGTH_SHORT).show();
                 } catch (JSONException e){}
-                Intent i = new Intent(PrincipalActivity.this,MensajeriaReal.class);
-                startActivity(i);
-                finish();
+                inicioOtraActividad();
             }
         },new Response.ErrorListener(){
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
-                Toast.makeText(PrincipalActivity.this,"El token no se pudo subir a la base de datos " + error.getMessage() ,Toast.LENGTH_SHORT).show();
+                Toast.makeText(Login.this,"El token no se pudo subir a la base de datos " + error.getMessage() ,Toast.LENGTH_SHORT).show();
             }
         });
         VolleyRP.addToQueue(solicitud,mRequest,this,volley);
+    }
+
+    public void inicioOtraActividad(){
+        Intent i = new Intent(Login.this,Activity_principal.class);
+        startActivity(i);
+        finish();
     }
 }

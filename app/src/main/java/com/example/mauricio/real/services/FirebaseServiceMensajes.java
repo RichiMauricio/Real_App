@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.v4.app.NotificationCompat.Builder;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.example.mauricio.real.Preferencias;
 import com.example.mauricio.real.R;
 import com.example.mauricio.real.mensajes.MensajeriaReal;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -25,18 +26,34 @@ public class FirebaseServiceMensajes extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        String mensaje = remoteMessage.getData().get("mensaje");
-        String hora = remoteMessage.getData().get("hora");
+        String tipo = remoteMessage.getData().get("tipo");
         String cabecera = remoteMessage.getData().get("cabecera");
         String cuerpo_mensaje = remoteMessage.getData().get("cuerpo_mensaje");
-        mensaje(mensaje,hora );
-        showNotification(cabecera,cuerpo_mensaje);
+        switch (tipo){
+            case "mensaje":
+                String mensaje = remoteMessage.getData().get("mensaje");
+                String hora = remoteMessage.getData().get("hora");
+                String receptor = remoteMessage.getData().get("receptor");
+                String emisorPHP = remoteMessage.getData().get("emisor");
+                String emisor = Preferencias.obtenerPreferenceString(this,Preferencias.PREFERENCE_USUARIO_LOGIN);
+                if (emisor.equals(receptor)){
+                    mensaje(mensaje,hora ,emisorPHP);
+                    showNotification(cabecera,cuerpo_mensaje);
+                }
+                break;
+            case "solicitud":
+                String usuarioEnvioSolicitud = remoteMessage.getData().get("user_envio_solicitud");
+                showNotification(cabecera,cuerpo_mensaje);
+                break;
+        }
+
     }
 
-    private void mensaje(String mensaje, String hora){
+    private void mensaje(String mensaje, String hora, String emisor){
         Intent i = new Intent(MensajeriaReal.MENSAJE);
         i.putExtra("key_mensaje",mensaje);
         i.putExtra("key_hora",hora);
+        i.putExtra("key_emisor_PHP",emisor);
         //Obtiene el contexto actual de donde nos encontremos xq no estamos en nuestra aplicación
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(i);
     }

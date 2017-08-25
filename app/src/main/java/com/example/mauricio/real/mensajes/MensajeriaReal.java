@@ -4,15 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,11 +22,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.mauricio.real.Preferencias;
-import com.example.mauricio.real.PrincipalActivity;
+import com.example.mauricio.real.Login;
 import com.example.mauricio.real.R;
 import com.example.mauricio.real.VolleyRP;
-import com.example.mauricio.real.services.FirebaseId;
-import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,8 +32,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-
-import static com.example.mauricio.real.R.id.rbSesion;
 
 public class MensajeriaReal extends AppCompatActivity {
 
@@ -49,10 +42,7 @@ public class MensajeriaReal extends AppCompatActivity {
     private MensajesAdapter adapter;
     private ImageButton btnEnviarMensaje;
     private EditText etEscribirMensaje;
-    private EditText etReceptor;
     private int LINEAS_TEXTO=1;
-
-    private Button cerrarSesion;
 
     private RequestQueue mRequest;
     private VolleyRP volley;
@@ -72,7 +62,11 @@ public class MensajeriaReal extends AppCompatActivity {
         mensajeTexto = new ArrayList<>();
 
         EMISOR = Preferencias.obtenerPreferenceString(this,Preferencias.PREFERENCE_USUARIO_LOGIN);
-
+        Intent i = getIntent();     //Intent para recibir el id del q será receptor del mensaje
+        Bundle bundle = i.getExtras();
+        if (bundle!=null){
+            RECEPTOR = bundle.getString("key_receptor");
+        }
 
         volley = VolleyRP.getInstance(this);
         mRequest = volley.getRequestQueue();
@@ -81,34 +75,22 @@ public class MensajeriaReal extends AppCompatActivity {
 
         rv = (RecyclerView)findViewById(R.id.rvMensajes);
         LinearLayoutManager llm = new LinearLayoutManager(this);
-        llm.setStackFromEnd(true);
+        llm.setStackFromEnd(true);//Mensajería
         rv.setLayoutManager(llm);   //Sirve para tener los datos en forma vertical
 
         btnEnviarMensaje = (ImageButton)findViewById(R.id.btnEnviarMensaje);
         etEscribirMensaje = (EditText)findViewById(R.id.etEscribirMensaje);
-        etReceptor = (EditText)findViewById(R.id.etreceptor);
-        cerrarSesion = (Button)findViewById(R.id.btnCerrarSesion);
         adapter = new MensajesAdapter(mensajeTexto,this);
 
         rv.setAdapter(adapter);
 
-        cerrarSesion.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(MensajeriaReal.this,PrincipalActivity.class);
-                startActivity(i);
-                Preferencias.guardarPreferenciasBoolean(MensajeriaReal.this,false,Preferencias.PREFERENCE_ESTADO_SESION);
-                finish();
-            }
-        });
 
         //Cada q haya un salto de línea no tapar el recycler view, sino q vaya desplegando al final el scroll
 
         btnEnviarMensaje.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String mensaje = validarCadena(etEscribirMensaje.getText().toString());
-                RECEPTOR = etReceptor.getText().toString();
+                String mensaje = (etEscribirMensaje.getText().toString()).trim();   //Convierte espacios al inicio y al final en solo la cadena de texto
                 if  (!mensaje.isEmpty() && !RECEPTOR.isEmpty()){
                     MENSAJE_ENVIAR = mensaje;
                     enviarMensaje();
@@ -132,7 +114,11 @@ public class MensajeriaReal extends AppCompatActivity {
             public void onReceive(Context context, Intent intent) {
                 String mensaje = intent.getStringExtra("key_mensaje");
                 String hora = intent.getStringExtra("key_hora");
-                crearMensaje(mensaje,hora,2);
+                String emisor = intent.getStringExtra("key_emisor_PHP");
+                String horaParametros[] = hora.split("\\,");
+                if (emisor.equals(RECEPTOR)){
+                    crearMensaje(mensaje,horaParametros[0],2);
+                }
             }
         };
     }
@@ -159,7 +145,7 @@ public class MensajeriaReal extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
-                Toast.makeText(MensajeriaReal.this,"Ocurrió un error " + error.getMessage() ,Toast.LENGTH_SHORT).show();
+                Toast.makeText(MensajeriaReal.this,"Ocurrió un error en Mensajería real " + error.getMessage() ,Toast.LENGTH_SHORT).show();
             }
         });
         VolleyRP.addToQueue(solicitud,mRequest,this,volley);
@@ -193,13 +179,4 @@ public class MensajeriaReal extends AppCompatActivity {
         rv.scrollToPosition(adapter.getItemCount()-1);  //Ubicar la pantalla al final para leer el último mensaje
     }
 
-    //Método para no enviar espacios en blanco o eliminar los espacios en blanco al inicio del mensaje
-    private String validarCadena(String cadena){
-        for(int i =0;i<cadena.length();i++){
-            if (!(""+cadena.charAt(i)).equalsIgnoreCase(" ")){
-                return cadena.substring(i,cadena.length());
-            }
-        }
-        return "";
-    }
 }

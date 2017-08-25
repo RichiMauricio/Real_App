@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.mauricio.real.PrincipalActivity"
+    tools:context="com.example.mauricio.real.Login"
     android:background="@color/colorDarkBlue">
 
     <LinearLayout
@@ -13,7 +13,11 @@
         android:orientation="vertical"
         android:gravity="center"
         tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="129dp">
+        tools:layout_editor_absoluteY="129dp"
+        android:id="@+id/linearLayout"
+        android:layout_marginTop="73dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:hint="Ingresar"
-            android:theme="@style/BotonColores"/>
+            android:theme="@style/BotonColores" />
 
         <RadioButton
             android:id="@+id/rbSesion"
@@ -58,19 +62,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/btnRegistrar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:background="@android:color/transparent"
-            android:hint="Registrar"
-            android:textColorHint="@color/colorWhite"
-            tools:layout_editor_absoluteX="605dp"
-            tools:layout_editor_absoluteY="67dp" />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/btnRegistrar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:hint="Registrar"
+        android:textColorHint="@color/colorWhite"
+        tools:layout_editor_absoluteX="605dp"
+        tools:layout_editor_absoluteY="67dp"
+        android:layout_below="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="80dp" />
 
 
-</android.support.constraint.ConstraintLayout>
+</RelativeLayout>
